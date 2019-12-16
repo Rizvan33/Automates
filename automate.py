@@ -449,17 +449,24 @@ class Automate(AutomateBase):
         	""" Automate  -> Automate
         	rend l'automate acceptant pour langage l'étoile du langage de a
         	"""
-		autodet = Automate.determinisation(auto)
-                Lt = autodet.listTransitions
-                
-                Si = autodet.getListInitialStates()[0]
-                
-                for t in autodet.listTransitions:
-                    if t.stateDest.fin:
-                        tb = Transition(t.stateSrc,t.etiquette,Si)
-                        Lt.append(tb)
+		Auto2 = copy.deepcopy(auto)
+		
+        	LT = Auto2.listTransitions
+       		LF = Auto2.getListFinalStates()
+        	LI = Auto2.getListInitialStates()
 
-		return Automate(Lt)
+       		newLT = []
+		#On cherche les transitions qui ont pour stateDest un état final
+       		for t in LT:
+            		if (t.stateDest).fin: #Si stateDest est un état final
+                		newLT.append(t) #On ajoute la transition à newLT
+
+        	#Pour chaque transition de newLT, on crée une nouvelle transition qui relie stateSrc aux états initiaux et on l'ajoute à l'automate
+        	for t in newLT:
+            		for dest in LI:
+                		Auto2.addTransition(Transition(t.stateSrc, t.etiquette, dest))
+
+       	 	return Auto2
 		
                 
 
