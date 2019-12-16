@@ -450,21 +450,17 @@ class Automate(AutomateBase):
         	rend l'automate acceptant pour langage l'étoile du langage de a
         	"""
 		Auto2 = copy.deepcopy(auto)
+       		Trans = []
 		
-        	LT = Auto2.listTransitions
-       		LF = Auto2.getListFinalStates()
-        	LI = Auto2.getListInitialStates()
-
-       		newLT = []
 		#On cherche les transitions qui ont pour stateDest un état final
-       		for t in LT:
+       		for t in Auto2.listTransitions :
             		if (t.stateDest).fin: #Si stateDest est un état final
-                		newLT.append(t) #On ajoute la transition à newLT
+                		Trans.append(t) #On ajoute la transition à newLT
 
         	#Pour chaque transition de newLT, on crée une nouvelle transition qui relie stateSrc aux états initiaux et on l'ajoute à l'automate
-        	for t in newLT:
-            		for dest in LI:
-                		Auto2.addTransition(Transition(t.stateSrc, t.etiquette, dest))
+        	for t in Trans:
+            		for i in Auto2.getListInitialStates() :
+                		Auto2.addTransition(Transition(t.stateSrc, t.etiquette, i))
 
        	 	return Auto2
 		
