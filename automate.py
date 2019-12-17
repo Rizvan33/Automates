@@ -393,15 +393,11 @@ class Automate(AutomateBase):
         	""" Automate x Automate -> Automate
         	rend l'automate acceptant pour langage l'union des langages des deux automates
        		 """
-		auto1b = copy.deepcopy(auto0)
-                auto2b = copy.deepcopy(auto1)
-                #on rajoute des préfixes
-                auto2b.prefixStates(2)
-                
-                Lt = auto1b.listTransitions + auto2b.listTransitions
-                
-                
-                return Automate(Lt)
+		 LT = auto0.listTransitions
+		 LT.extend(auto1.listTransitions)
+        	 Auto2 = Automate(LT)
+        	 Auto2 = Automate.determinisation(Auto2)
+        	 return Automate2
     
 
    	@staticmethod
