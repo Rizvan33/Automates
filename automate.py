@@ -13,7 +13,6 @@ class Automate(AutomateBase):
         
         def succElem(self, state, lettre):
             """State * str -> list[State]
-
         	rend la liste des états accessibles à partir d'un état
         	state par l'étiquette lettre.
             """
@@ -24,11 +23,10 @@ class Automate(AutomateBase):
                 if ((t.etiquette == lettre) and (t.stateDest not in successeurs)):
                     successeurs.append(t.stateDest)
             return successeurs
-        ##Testée - fonctionne bien
+        ## Testée - fonctionne bien
         
         def succ (self, listStates, lettre):
             """list[State] * str -> list[State]
-        
         	rend la liste des états accessibles à partir de la liste d'états
         	listStates par l'étiquette lettre
             """
@@ -43,7 +41,7 @@ class Automate(AutomateBase):
                     if (sp not in listEtatsAccessibles):
                         listEtatsAccessibles.append(sp)
             return listEtatsAccessibles
-        ##Testée - fonctionne bien 
+        ## Testée - fonctionne bien 
         
         
         """ Définition d'une fonction déterminant si un mot est accepté par un automate.
@@ -58,7 +56,6 @@ class Automate(AutomateBase):
         @staticmethod
         def accepte(auto, mot) :
             """ Automate * str -> bool
-            
             rend True si auto accepte mot, False sinon
             """
             ## Déjà, premier test : chaque lettre du mot doit avoir au moins un état qui le succède pour que le mot soit accepté
@@ -86,8 +83,7 @@ class Automate(AutomateBase):
                  
         @staticmethod
         def estComplet(auto, alphabet) :
-            """ Automate * str -> bool
-                
+            """ Automate * str -> bool    
             rend True si auto est complet pour alphabet, False sinon
             """   
             ## Dire qu'un automate est complet revient à dire que chaque état a au moins une transition            
@@ -106,8 +102,7 @@ class Automate(AutomateBase):
         
         @staticmethod
         def estDeterministe(auto) :
-            """ Automate  -> bool
-                
+            """ Automate  -> bool 
             rend True si auto est déterministe, False sinon
             """
             ## Dire qu'un automate est déterministe revient à dire que chaque état a une et une seule transition de la meme étiquette
@@ -128,168 +123,169 @@ class Automate(AutomateBase):
        
         @staticmethod
         def completeAutomate(auto,alphabet) :
-                """ Automate x str -> Automate
-                rend l'automate complété d'auto, par rapport à alphabet
-                """
+            """ Automate x str -> Automate   
+            rend l'automate complété d'auto, par rapport à alphabet
+            """
                 
-                #autonew : Automate
-                autonew = copy.deepcopy(auto) #on clone auto
+            #autonew : Automate
+            autonew = copy.deepcopy(auto) #on clone auto
                 
-                if(Automate.estComplet(auto,alphabet)):
-                    return autonew #si l'automate est déjà complet, pas besoin de puit
+            if(Automate.estComplet(auto,alphabet)):
+                return autonew #si l'automate est déjà complet, pas besoin de puit
                 
-                #Letats = list[State]
-                Letats = auto.listStates #on récupère la liste de tout les états de l'automate
-                #Lid = list[int]
-                Lid = [s.id for s in Letats] #récupération de tout les id
+            #Letats : list[State]
+            Letats = auto.listStates #on récupère la liste de tout les états de l'automate
+            #Lid : list[int]
+            Lid = [s.id for s in Letats] #récupération de tout les id
                 
-                #puit = State
+            #puit : State
                 
-                puit = State(max(Lid)+1,False,False,"P") #on attribue bien un identifiant unique
-                if(autonew.addState(puit)):
-                    for s in Letats: 
-                        for c in alphabet:
-                            if(len(auto.succElem(s,c))==0):
-                                autonew.addTransition(Transition(s,c,puit)) #création d'une transition vers le puit
-                
+            puit = State(max(Lid)+1,False,False,"P") #on attribue bien un identifiant unique
+            if(autonew.addState(puit)):
+                for s in Letats: 
                     for c in alphabet:
-                        autonew.addTransition(Transition(puit,c,puit)) #rajout des boucles pour chaque lettre sur le puit
+                        if(len(auto.succElem(s,c))==0):
+                            autonew.addTransition(Transition(s,c,puit)) #création d'une transition vers le puit
                 
-                return autonew
-
+                 for c in alphabet:
+                    autonew.addTransition(Transition(puit,c,puit)) #rajout des boucles pour chaque lettre sur le puit
+                
+            return autonew
+            ## ?    
 
        
         @staticmethod
         def determinisation(auto) :
-                """ Automate  -> Automate
-                rend l'automate déterminisé d'auto
-                """
-                if(Automate.estDeterministe(auto)):
-                    return auto
+            """ Automate  -> Automate   
+            rend l'automate déterminisé d'auto
+            """
+            if(Automate.estDeterministe(auto)):
+                return auto
                 
-                #Lini = list[State]
-                Lini = auto.getListInitialStates()
+            #Lini = list[State]
+            Lini = auto.getListInitialStates()
                 
-                #alphabet : list[String]
-                alphabet = auto.getAlphabetFromTransitions()
+            #alphabet : list[String]
+            alphabet = auto.getAlphabetFromTransitions()
                 
-                #cpt : int
-                # servira d'id à nos nouveaux états, à incrémenter à chaque création d'état
-                cpt = 0
+            #cpt : int
+            # servira d'id à nos nouveaux états, à incrémenter à chaque création d'état
+            cpt = 0
                 
-                #Lt = list[Transition]
-                Lt=[]
+            #Lt = list[Transition]
+            Lt=[]
                 
-                #LS = list[State]
-                LS = []
+            #LS = list[State]
+            LS = []
                 
-                #LSp : list[tuple(set[State],Bool,Bool,String]
-                LSp = []
+            #LSp : list[tuple(set[State],Bool,Bool,String]
+            LSp = []
                 
-                #Eini : set[State]
-                Eini = {s for s in Lini}
+            #Eini : set[State]
+            Eini = {s for s in Lini}
                 
-                #s0isFinal : boolean
-                s0isFinal = False
+            #s0isFinal : boolean
+            s0isFinal = False
                 
-                for s in Eini:
-                    if(s.fin):
-                        s0isFinal = True
+            for s in Eini:
+                if(s.fin):
+                    s0isFinal = True
                 
-                #labels0 : String
-                labels0 = "{"
-                cptbis = 0
-                for s in Lini:
-                    cptbis+=1
-                    if(cptbis == len(Lini)):
-                        labels0+= s.label + "}"
-                    else:
-                        labels0 += s.label +","
-                #on a notre premier état, on l'ajoute à LS :
-                LS.append(State(cpt,True,s0isFinal,labels0))
-                cpt += 1
+            #labels0 : String
+            labels0 = "{"
+            cptbis = 0
+            for s in Lini:
+                cptbis += 1
+                if(cptbis == len(Lini)):
+                    labels0 += s.label + "}"
+                else:
+                    labels0 += s.label +","
+            #on a notre premier état, on l'ajoute à LS :
+            LS.append(State(cpt,True,s0isFinal,labels0))
+            cpt += 1
                 
-                #pseudo_s0 : tuple[set[State],Boolean,Boolean]
-                pseudo_s0 = Eini
+            #pseudo_s0 : tuple[set[State],Boolean,Boolean]
+            pseudo_s0 = Eini
                 
-                LSp.append(pseudo_s0)
+            LSp.append(pseudo_s0)
                 
-                # i : int, indice de l'état de départ courant
-                i = 0
+            # i : int, indice de l'état de départ courant
+            i = 0
                 
-                # j'ai enlevé la partie "label" des pseudos états qui faisait foirer tout
-                for E in LSp:
-                    i += 1
-                    d = 0
-                    for c in alphabet:
-                        #Lsucc = liste des successeurs
-                        Ltemp = [e for e in E]
-                        Lsucc = auto.succ(Ltemp,c) 
-                        if(len(Lsucc)!= 0 ):
-                            # label temporaire initialisé vide
-                            labeltemp = "{"
-                            # boolean temporaire à mettre à true si les successeurs contiennent un etat final
-                            final = False
-                            #boolean temp pour état initial
-                            initial = False
-                            #Pstemp : pseudo etat initialisé vide
-                            Pstemp = ()
-                            #Etemp = ensemble d'état temporaire
-                            Etemp = set()
+            # j'ai enlevé la partie "label" des pseudos états qui faisait foirer tout
+            for E in LSp:
+                i += 1
+                d = 0
+                for c in alphabet:
+                    #Lsucc = liste des successeurs
+                    Ltemp = [e for e in E]
+                    Lsucc = auto.succ(Ltemp,c) 
+                    if(len(Lsucc)!= 0 ):
+                        # label temporaire initialisé vide
+                        labeltemp = "{"
+                        # boolean temporaire à mettre à true si les successeurs contiennent un etat final
+                        final = False
+                        #boolean temp pour état initial
+                        initial = False
+                        #Pstemp : pseudo etat initialisé vide
+                        Pstemp = ()
+                        #Etemp = ensemble d'état temporaire
+                        Etemp = set()
                             
-                            #on créé les éléments de notre pseudo état
-                            cptter = 0
-                            for s in Lsucc:
-                                cptter+= 1
-                                if(cptter == len(Lsucc)):
-                                    labeltemp += s.label + "}"
-                                else:
-                                    labeltemp += s.label +","
+                        #on créé les éléments de notre pseudo état
+                        cptter = 0
+                        for s in Lsucc:
+                            cptter += 1
+                            if(cptter == len(Lsucc)):
+                                labeltemp += s.label + "}"
+                            else:
+                                labeltemp += s.label +","
                                 
-                                Etemp.add(s)
-                                if(s.fin):
-                                    final = True
+                            Etemp.add(s)
+                            if(s.fin):
+                                final = True
+                                  
+                            if(Lsucc == Lini):
+                                initial = True
                                     
-                                if(Lsucc == Lini):
-                                    initial = True
-                                    
-                                Pstemp = Etemp
+                            Pstemp = Etemp
                             
-                            if(Pstemp not in LSp):
-                                LSp.append(Pstemp)
-                                d += 1 
-                                #on créé l'état correspondant
-                                Stemp = State(cpt,initial,final,labeltemp)
-                                cpt += cpt + 1
+                         if(Pstemp not in LSp):
+                            LSp.append(Pstemp)
+                            d += 1 
+                            #on créé l'état correspondant
+                            Stemp = State(cpt,initial,final,labeltemp)
+                            cpt += cpt + 1
                                 
-                                LS.append(Stemp)
+                            LS.append(Stemp)
                                 
-                            Ttemp = Transition(LS[i-1],c,LS[i-1+d])
-                            Lt.append(Ttemp)
+                        Ttemp = Transition(LS[i-1],c,LS[i-1+d])
+                        Lt.append(Ttemp)
                             
-                return Automate(Lt)
-
+            return Automate(Lt)
+            ## ? 
+            
     	@staticmethod
     	def complementaire (auto,alphabet) :
         	""" Automate -> Automate
         	rend  l'automate acceptant pour langage le complémentaire du langage de a
         	"""
-		#tempAuto : Automate
+            #tempAuto : Automate
         	tempAuto = Automate(auto.listTransitions)
         	tempAuto = Automate.completeAutomate(tempAuto,alphabet)
         	tempAuto = Automate.determinisation(tempAuto)
         	for i in tempAuto.listStates:
-             		i.fin= not (i.fin)
-		return tempAuto
-
+                i.fin= not (i.fin)
+            return tempAuto
+            ## ? 
 
     	@staticmethod
     	def intersection (auto0, auto1):
         	""" Automate x Automate -> Automate
         	rend l'automate acceptant pour langage l'intersection des langages des deux automates
-       		 """
-		if(auto0.listTransitions==auto1.listTransitions):
-        		return Automate(auto0.listTransitions)
+       		"""
+            if(auto0.listTransitions==auto1.listTransitions):
+                return Automate(auto0.listTransitions)
         	################### Creation des Variables utiles au programme ########
         	#id : int
         	id=0
@@ -318,8 +314,8 @@ class Automate(AutomateBase):
         	#alphabet : str
         	alphabet= alphabet0
         	for c in alphabet1:
-            		if c not in alphabet0:
-                		alphabet+=c
+                if c not in alphabet0:
+                    alphabet+=c
         	################# Création de la liste des States initiaux ###############
         	#Liste : list[tuple(States)]
         	Liste=[] ##Notre liste d'attente
@@ -328,52 +324,50 @@ class Automate(AutomateBase):
        		#Liste1 : list[States]
        		Liste1=auto1.getListInitialStates()
         	for l0 in Liste0:
-            		for l1 in Liste1:
-                 		Liste.append((l0,l1))
-                 		Liste_parcourue.append((l0,l1))
+                for l1 in Liste1:
+                    Liste.append((l0,l1))
+                 	Liste_parcourue.append((l0,l1))
        	 	################ Création de la liste des States des états finaux #########
         	#Liste0_f : list[States]
         	Liste0_f=auto0.getListFinalStates()
         	#Liste1_f : list[States]
         	Liste1_f=auto1.getListFinalStates()
         	#Liste_f : list[States]
-        	Liste_f =Liste0_f
+        	Liste_f = Liste0_f
         	for l1 in Liste1_f:
-            		if l1 not in Liste0_f:
-                		Liste_f.append(l1)
+                if l1 not in Liste0_f:
+                    Liste_f.append(l1)
         	################ Création de l'ensemble des States du nouvel automate #########
         	#new_States ; set(State)
-        	new_States=set()
+        	new_States = set()
         	for l in Liste:
-            		if l[0] in Liste_f and l[1] in Liste_f:
-                		test=True
-            		new_States.add(State(id ,True ,test ,"("+ str (l[0])+ " ; "+ str (l[1])+ ")") )
-            		test=False
-            		id+=1
+            	if l[0] in Liste_f and l[1] in Liste_f:
+                    test = True
+            	new_States.add(State(id ,True ,test ,"("+ str (l[0])+ " ; "+ str (l[1])+ ")") )
+            	test = False
+            	id += 1
         	################ Parcours de la Liste d'attente #############################
         	while(Liste!=[]):
-            		s="("+ str (Liste[0][0]) + " ; "+str (Liste[0][1])+")"
-            		for l in new_States:
-            		    if s==l.label:
-            		        State_temp1=l
-            		        break
-
-            		for lettre in alphabet:
-                		Liste_temp0=auto0.succElem(Liste[0][0],lettre)
-                		Liste_temp1=auto1.succElem(Liste[0][1],lettre)
-               			for l0 in Liste_temp0: ##automate construit ne doit pas avoir d’ ́etat non accessible depuis l’ ́etat initial
-                    			for l1 in Liste_temp1:
-                       				if (l0,l1) in Liste_parcourue:
-                            				s = "("+str (l0) +" ; "+ str (l1)+")"
-                            				for l in new_States:
-                                				if s==l.label:
-                                    					State_temp2=l
-                                    					Liste_Transition.append(Transition(State_temp1,lettre,State_temp2))
-                                    					break
-
-                        			else:
-                           				if l0 in Liste_f and l1 in Liste_f:   #Test pour voir si l'état sera final
-                                				test=True
+                s="("+ str (Liste[0][0]) + " ; "+str (Liste[0][1])+")"
+            	for l in new_States:
+                    if s==l.label:
+                        State_temp1=l
+            		    break
+            	for lettre in alphabet:
+                    Liste_temp0=auto0.succElem(Liste[0][0],lettre)
+                	Liste_temp1=auto1.succElem(Liste[0][1],lettre)
+               		for l0 in Liste_temp0: ##automate construit ne doit pas avoir d’ ́etat non accessible depuis l’ ́etat initial
+                        for l1 in Liste_temp1:
+                            if (l0,l1) in Liste_parcourue:
+                                s = "("+str (l0) +" ; "+ str (l1)+")"
+                                    for l in new_States:
+                                        if s==l.label:
+                                            State_temp2=l
+                                    		Liste_Transition.append(Transition(State_temp1,lettre,State_temp2))
+                                    		break
+                                        else:
+                                            if l0 in Liste_f and l1 in Liste_f:   #Test pour voir si l'état sera final
+                                                test=True
                             				Liste_parcourue.append((l0,l1))
                             				s= "("+str (l0) + " ; "+str (l1)+")"
                             				State_temp2=State(id,False,test,s)
@@ -383,29 +377,29 @@ class Automate(AutomateBase):
                             				new_States.add(State_temp2)
                             				Liste.append((l0,l1))
 
-            		del Liste[0] 
+                del Liste[0] 
 
-		return Automate(Liste_Transition)
-
+            return Automate(Liste_Transition)
+            ## ? 
 
     	@staticmethod
     	def union (auto0, auto1):
         	""" Automate x Automate -> Automate
         	rend l'automate acceptant pour langage l'union des langages des deux automates
-       		 """
-		 LT = auto0.listTransitions
-		 LT.extend(auto1.listTransitions)
-        	 Auto2 = Automate(LT)
-        	 Auto2 = Automate.determinisation(Auto2)
-        	 return Automate2
-    
+       		"""
+            LT = auto0.listTransitions
+            LT.extend(auto1.listTransitions)
+        	Auto2 = Automate(LT)
+        	Auto2 = Automate.determinisation(Auto2)
+        	return Automate2
+            ## ? 
 
    	@staticmethod
     	def concatenation (auto1, auto2):
         	""" Automate x Automate -> Automate
         	rend l'automate acceptant pour langage la concaténation des langages des deux automates
         	"""
-		#Auto1 : Automate
+            #Auto1 : Automate
         	Auto1 = copy.deepcopy(auto1)
         	#Auto2 : Automate
         	Auto2 = copy.deepcopy(auto2)
@@ -423,44 +417,41 @@ class Automate(AutomateBase):
         	#test : boolean
         	test=False
         	for i in Auto1.listStates:
-            		i.insertPrefix(1)
-            		if i in Liste_F:
-                		i.fin=False
+                i.insertPrefix(1)
+            	if i in Liste_F:
+                    i.fin=False
         	Auto2.prefixStates(2)
 
         	for f in Liste_F:
-            		for L in Liste2T:
-                		if L.stateSrc in Liste_In:
-                    			L.stateSrc = f
-                		if L.stateDest in Liste_In:
-                    			L.stateDest = f
-                		if L in ListeT:
-                    			continue
+            	for L in Liste2T:
+                	if L.stateSrc in Liste_In:
+                        L.stateSrc = f
+                	if L.stateDest in Liste_In:
+                    	L.stateDest = f
+                	if L in ListeT:
+                    	continue
                 		ListeT.append(L)
 
         	return Automate(ListeT)
-	
+            ## ? 
+            
     	@staticmethod
     	def etoile (auto):
         	""" Automate  -> Automate
         	rend l'automate acceptant pour langage l'étoile du langage de a
         	"""
-		Auto2 = copy.deepcopy(auto)
+            Auto2 = copy.deepcopy(auto)
        		Trans = []
 		
-		#On cherche les transitions qui ont pour stateDest un état final
+            #On cherche les transitions qui ont pour stateDest un état final
        		for t in Auto2.listTransitions :
-            		if (t.stateDest).fin: #Si stateDest est un état final
-                		Trans.append(t) #On ajoute la transition à newLT
+                if (t.stateDest).fin: #Si stateDest est un état final
+                    Trans.append(t) #On ajoute la transition à newLT
 
         	#Pour chaque transition de newLT, on crée une nouvelle transition qui relie stateSrc aux états initiaux et on l'ajoute à l'automate
         	for t in Trans:
-            		for i in Auto2.getListInitialStates() :
-                		Auto2.addTransition(Transition(t.stateSrc, t.etiquette, i))
+                for i in Auto2.getListInitialStates() :
+                    Auto2.addTransition(Transition(t.stateSrc, t.etiquette, i))
 
        	 	return Auto2
-		
-                
-
-
-  
+            ## ? 
