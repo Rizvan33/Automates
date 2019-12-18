@@ -164,99 +164,97 @@ class Automate(AutomateBase):
         ## Passons à la fonction la plus longue et la plus "dure", rien ne nous arretera, on aura tous les boules de cristal, on attrapera tous les pokémons <3 ## Meilleurs dresseurs
         @staticmethod
         def determinisation(auto) :
-                """ Automate  -> Automate
-                rend l'automate déterminisé d'auto
-                """
-                ## Dire qu'un automate est déterministe revient à dire que chaque état a une et une seule transition de la meme étiquette
-                ## Donc supprimer les transitions en plus :) Rajouter les transitions manquantes :=) ALORS AUTANT EN CREER UN NOUVEAU
-                ## La meilleure facon d'expliquer le raisonnement de cette fonction est de voir le s0 et de dire on a généralisé :) 
-                ## Comme d'hab, peut etre qu'il est déterministe, déjà, alors juste retournons le 
-                if(Automate.estDeterministe(auto)): # Ah pas de boulot, il est déjà déterministe 
-                    return auto
-                ## Ok, pas deterministe, on y va :)
+            #Si l'automate est déterministe, on retourne auto
+            if (Automate.estDeterministe(auto)) :
+                return auto
+
+            #Liste des états finaux de l'automate de départ
+            liste_etats_finaux = auto.getListFinalStates()
+            #Liste des états d'entree de l'automate de départ
+            liste_etats_initiaux = auto.getListInitialStates()
+            #Liste des etats du nouvel automate sous la forme list[set[State]]
+            liste_new_etat = [set(liste_etats_initiaux)]
+            #La liste des transitions du nouvel automate sous la forme list[ list[set[State],str,set[State]] ]
+            liste_new_transition = []
+            #La liste des états à traiter sous la forme list[list[State]]
+            etats_en_cours = [liste_etats_initiaux]
+            #L'alphabet de l'automate list[str]
+            alphabet = auto.getAlphabetFromTransitions()
+            count_nb_etats = 0
+
+
+            while(len(etats_en_cours) != 0) :
+
+                index_courant = len(etats_en_cours)-1
+                #Pour chaque ensemble d'états dans la liste à traiter
+                while index_courant >= 0 :
+                    ens_state = etats_en_cours[index_courant]
+                    #Liste des transitions de tous les sous_etat
+                    liste_transitions = []
+                    #Pour chaque sous_état dans l'ensemble d'états
+                    for sous_state in ens_state :
+                        #On prend les transitions du sous état et on les ajoute à la liste
+                        liste_transitions += auto.getListTransitionsFrom(sous_state)
+
+                    #Pour chaque lettre de l'alphabet, on va regarder si il y en a une avec une étiquette
+                    for etiquette in alphabet :
+                        #La variable qui va contenir l'ensemble des etats suivants
+                        ens_etats_suivants = set()
+                        #Pour chaque transition à partir du sous-etat, on check celle(s) qui est associée à une lettre de l'alphabet
+                        for transition in liste_transitions :
+                            if etiquette == transition.etiquette :
+                                ens_etats_suivants.add(transition.stateDest)
+
+                        #On n'ajoute pas un état vide
+                        if ens_etats_suivants != set() :
+                            #Si l'état n'est pas déjà présent dans la liste des états à traiter, on l'ajoute
+                            #Si l'état n'est pas déjà présent dans la liste des états finaux
+                            if list(ens_etats_suivants) not in etats_en_cours and ens_etats_suivants not in liste_new_etat :
+                                etats_en_cours.append(list(ens_etats_suivants))
+                                liste_new_etat.append(ens_etats_suivants)
+
+                            #On ajoute la transition dans la liste des transisions finales
+                            liste_new_transition.append([set(ens_state),etiquette,ens_etats_suivants])
+
+                    #On retire de la liste l'état que l'on vient de traiter
+                    etats_en_cours.remove(ens_state)
+                    #On décrémente l'index courant
+                    index_courant -= 1
+
+
+            #Liste des transitions qui vont nous permettre de construire le nouvel automate
+            liste_transitions_final_simplifie = []
+
+            #Pour chaque transition que l'on a crée précédemment, il nous faut créer les états qui corresondent
+            for transition in liste_new_transition :
+                #Les booléens qui vont renseigner la nature d l'état
+                if_etat_init1 = False
+                if_etat_final1 = False
+                if_etat_init2 = False
+                if_etat_final2 = False
+                for etat in transition[0] :
+                    if etat in liste_etats_initiaux :
+                        if_etat_init1 = True
+
+                    if etat in liste_etats_finaux :
+                        if_etat_final1 = True
+
+                for etat in transition[2] :
+                    if etat in liste_etats_initiaux :
+                        if_etat_init2 = True
+
+                    if etat in liste_etats_finaux :
+                        if_etat_final2 = True
+
+                etat1 = State(liste_new_etat.index(transition[0]),if_etat_init1,if_etat_final1,transition[0])
+                etat2 = State(liste_new_etat.index(transition[2]),if_etat_init2,if_etat_final2,transition[2])
+                etiquette = transition[1]
+                liste_transitions_final_simplifie.append(Transition(etat1,etiquette,etat2))
+
+
+            return Automate(liste_transitions_final_simplifie)
+
                 
-                ## Commençons par déclarer et initialiser les variables dont on aura besoin :) 
-                #listeEtatsInitiales = list[State]
-                listeEtatsInitiales = auto.getListInitialStates() ## On prend tous les états Initiales 
-                
-                #alphabet : list[String]
-                alphabet = auto.getAlphabetFromTransitions() ## On prend l'alphabet (celui de estcomplet comme d'hab ;) )
-                
-                #listeDeTransitions = list[Transition]
-                listeDeTransitions = [] ## vide de base
-                
-                #listeDeStates = list[State]
-                listeDeStates = [] ## vide de base 
-                
-                #listeDeCouplesDeStatesCrees : list[tuple(set[State],Bool,Bool,String] ## Merci la doc :p 
-                listeDeCouplesDeStatesCrees = [] ## vide de base 
-                
-                #ensembleDEtatsInitiales : set[State]
-                ensembleDEtatsInitiales = {s for s in listeEtatsInitiales} ## Compréhention d'états pour récupérer fissa les listes d'états initiales # s : State du coup variable courante
-                
-                ## On s'occupe du premier état 
-                #s0isFinal : boolean
-                s0isFinal = False ## Initialisation à false, après on verra si c est true :) 
-                # s : State ## Variable Courante
-                for s in ensembleDEtatsInitiales: ## On parcourt les états initales
-                    if(s.fin): ## renvoie True si final et False sinon
-                        s0isFinal = True
-                
-                ## On s'occupe des labels :)
-                #labelisteDeStates0 : String ## Avec un grand S parceque c'est un objet :) Merci cours de Java ^^
-                labelisteDeStates0 = "{"## On commence par { toujours alors autant le faire :) 
-                
-                for s in listeEtatsInitiales: ## On parcourt tous les états initiales 
-                    if(len(labelisteDeStates0) == len(listeEtatsInitiales)):## On a fini
-                        labelisteDeStates0+= s.label + "}" ## On est arrivé à la fin donc on ferme } 
-                    else: 
-                        labelisteDeStates0 += s.label +"," ## pas encore la fin mais nouveau label, donc virgule pour les séparer, c'est comme ça ^^
-                ## Le cptbis nous sert ici pour vérifier (avec un assert) puis on taech à la poubelle :) 
-                #on a notre premier état, on l'ajoute à listeDeStates :
-                listeDeStates.append(State(0,True,s0isFinal,labelisteDeStates0)) ## s0 donc initial pour sur d ou le True :) 
-                listeDeCouplesDeStatesCrees.append(ensembleDEtatsInitiales) ##oppla on les rajoute à la liste c est en fait le s0 en tant qu ensemble qu on rajoute :) 
-                
-                ## Maintenant ce qu'on a fait pour s0, on va le généraliser pour tout le reste $.$ 
-                
-                # i : int ## compteur (indique à chaque fois l'indice d'ou on pointe dans la liste des states)
-                i = 0
-                # E : set 
-                for E in listeDeCouplesDeStatesCrees: ## on a notre set dans les couples pour accéder aux couples 
-                    i += 1 ## on est au 1er indice la premiere fois et ainsi de suiste
-                    # c : char 
-                    for c in alphabet:## On parcourt l'alphabet 
-                        #listeDeStatesucc = liste des successeurs
-                        listeDeStatesucc = [e for e in E] ## liste des successeurs de chacun des states dans E / compréhension de liste pour écrire en une seule ligne 
-                        listeDeStatesucc += auto.succ(listeDeStatesucc,c) ## On rajoute le successeur de la lettre
-                        if(len(listeDeStatesucc)!= 0 ): ## Liste non vide, cool, on rajoute :)
-                            labelisteDeTransitionsemp = "{"  ## On commence par {
-                            # final : bool ## etat final ? true apres si c est le cas 
-                            final = False ## On initialise à false 
-                            # intial : bool ##etat initial ? ture apres si c est le cas 
-                            initial = False ## On initialise à false 
-                            Pstemp = () ## pseudo état temporaire vu que c est un tuple 
-                            Etemp = set() ## ensemble d'états temporaitres 
-                            ## On  fait la meme chose faire pour s0 pas besoin de commenter :)
-                            for s in listeDeStatesucc:  ## on parcourt tous les états successeurs 
-                                if(len(listeDeStatesucc) == len(listeDeStatesucc)):## si on finit le parcours on rajoute }
-                                    labelisteDeTransitionsemp += s.label + "}"
-                                else:
-                                    labelisteDeTransitionsemp += s.label +"," ## sinon comme tout a l heure , pour rajouter en plus 
-                                Etemp.add(s) ## on rajoute l etat a la liste temporaire 
-                                if(s.fin):## si final alors final 
-                                    final = True
-                                if(listeDeStatesucc == listeEtatsInitiales): ## si liste des successeur la meme que celle etats initials alors ouais state initial
-                                    initial = True
-                                Pstemp = Etemp ## Juste pour mieux voir après :) 
-                            if(Pstemp not in listeDeCouplesDeStatesCrees): ##unicité 
-                                listeDeCouplesDeStatesCrees.append(Pstemp) ## unique donc rajoute 
-                                #on crée l'état enfin :) 
-                                ## enfin notre state on le rajoute 
-                                listeDeStates.append(State(0,initial,final,labelisteDeTransitionsemp)) ##On met 0 à id à chaque fois bon aurait pu mettre un compteur ou utiliser i mais ca sert à rien ^^
-                            listeDeTransitions.append(Transition(listeDeStates[i-1],c,listeDeStates[i-1])) ## i-1 car on commence de 0 pour éviter débordement 
-                            
-                return Automate(listeDeTransitions) ## Constructeur Automate par la liste des transitions uniquement  (listeDeTransition finale)
-                ## testée - fonction bien
 
       	@staticmethod
     	def complementaire (auto,alphabet) :
