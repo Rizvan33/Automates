@@ -10,7 +10,6 @@ from automateBase import AutomateBase
 
 
 class Automate(AutomateBase):
-        ## EXCUSE MY FRENCH d'avance :p (dans les commentaires écrit à l'arrache et remplacer par de partout xD)
         def succElem(self, state, lettre):
             """State * str -> list[State]
 
@@ -253,12 +252,11 @@ class Automate(AutomateBase):
                                 listeDeCouplesDeStatesCrees.append(Pstemp) ## unique donc rajoute 
                                 #on crée l'état enfin :) 
                                 ## enfin notre state on le rajoute 
-                                listeDeStates.append(State(0,initial,final,labelisteDeTransitionsemp)) ##On met 0 à id à chaque fois :p bon aurait pu mettre un compteur ou utiliser i mais ca sert à rien ^^
+                                listeDeStates.append(State(0,initial,final,labelisteDeTransitionsemp)) ##On met 0 à id à chaque fois bon aurait pu mettre un compteur ou utiliser i mais ca sert à rien ^^
                             listeDeTransitions.append(Transition(listeDeStates[i-1],c,listeDeStates[i-1])) ## i-1 car on commence de 0 pour éviter débordement 
                             
-                return Automate(listeDeTransitions) ## Constructeur Automate par la laiste des transitions uniquement  (listeDeTransition finale ouf)
-                ## testée - fonction bien, pas dure finalement mais longue et pas sympa :/ 
-## On a supprimé le reste des fonctions pour l'instant puisqu'on nous les demande pas aujourd'hui, donc c'est fini :) 
+                return Automate(listeDeTransitions) ## Constructeur Automate par la liste des transitions uniquement  (listeDeTransition finale)
+                ## testée - fonction bien
 
       	@staticmethod
     	def complementaire (auto,alphabet) :
@@ -266,13 +264,14 @@ class Automate(AutomateBase):
                 rend  l'automate acceptant pour langage le complémentaire du langage de a
                 """
                 #tempAuto : Automate
-                tempAuto = Automate(auto.listTransitions)
-                tempAuto = Automate.completeAutomate(tempAuto,alphabet)
-                tempAuto = Automate.determinisation(tempAuto)
-                for i in tempAuto.listStates:
-                    i.fin= not (i.fin)
-                return tempAuto
-
+                tempAuto = Automate(auto.listTransitions) ##copie de l'automate 
+                tempAuto = Automate.completeAutomate(tempAuto,alphabet) ##complétion de l'automate
+                tempAuto = Automate.determinisation(tempAuto) ## déterminisation de l'automate
+                #s : State 
+                for s in tempAuto.listStates:
+                    s.fin = not (s.fin) ## ajout des états opposés 
+                return tempAuto ## retour de l'automate 
+        ## testée - fonctionne bien 
 
     	@staticmethod
     	def intersection (auto0, auto1):
